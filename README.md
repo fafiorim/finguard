@@ -1,7 +1,7 @@
 # FinGuard - Financial Services Malware Scanner
 
 [![GitHub](https://img.shields.io/badge/github-fafiorim%2Ffinguard-blue)](https://github.com/fafiorim/finguard)
-[![Version](https://img.shields.io/badge/version-1.6.0-green)](https://github.com/fafiorim/finguard)
+[![Version](https://img.shields.io/badge/version-1.1.0-green)](https://github.com/fafiorim/finguard)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Powered by](https://img.shields.io/badge/powered%20by-TrendAI%20File%20Security-red)](https://www.trendmicro.com)
 
@@ -477,30 +477,21 @@ docker run -d \
 
 ## Version Information
 
-### Latest Release: v1.6.0 (FinGuard)
+### Latest Release: v1.1.0
 
 **What's New:**
-- 🐛 **Fixed EICAR malware detection bug** - Files now correctly identified as unsafe
-- 🤖 **PML Detection** - AI-powered zero-day malware detection
-- 🌐 **SPN Feedback** - Smart Protection Network integration
-- 📊 **Verbose Results** - Detailed scan metadata and diagnostics
-- 🔍 **Active Content Detection** - PDF scripts and Office macros detection
-- 🔄 **Scan Method Selection** - Buffer vs File scanning options
-- 🔐 **File Hash Calculation** - SHA1/SHA256 digests with toggle
-- 🏷️ **Configuration Tags** - Audit trail with ml_enabled, spn_feedback, active_content
-- 📄 **Sample Files** - Test files included for feature validation
-- 🎨 **FinGuard Branding** - Specialized for financial services
+- 🐛 **Fixed S3 scanner result parsing** - Clean files no longer incorrectly flagged as malicious with verbose mode
+- 📚 **Improved test documentation** - Clarified that test scripts require running container
+- ✨ **Enhanced result detection** - Handles both verbose and standard scan result structures
 
 **Bug Fixes:**
-- Fixed malware detection logic to properly parse both verbose and non-verbose scan results
-- Scanner now correctly uses `isSafe` field from scanner response
-- EICAR test files properly marked as unsafe in all scan modes
+- Fixed S3 Object Storage scanner incorrectly identifying clean files as malicious when verbose or active content detection enabled
+- Enhanced scan result parsing to properly handle `result.atse.malwareCount` (verbose) and `scanResult` (standard) structures
+- Removed confusing DEBUG output from S3 scan results display
 
-**Security Updates:**
-- Updated Go from 1.21 to 1.24.12 (fixes 16 stdlib vulnerabilities)
-- Updated golang.org/x/net from v0.22.0 to v0.49.0
-- Updated bcrypt from 5.1.1 to 6.0.0 (fixes 3 high severity vulnerabilities)
-- Zero remaining vulnerabilities (verified with npm audit and govulncheck)
+**Documentation:**
+- Clarified test script prerequisites in README.md
+- Added note that test-quick.sh and test-all.sh test already-running containers
 
 **Technical Details:**
 - TrendAI SDK: tm-v1-fs-golang-sdk v1.7.0
@@ -509,8 +500,8 @@ docker run -d \
 - Multi-architecture: AMD64, ARM64
 
 **Previous Versions:**
-- v1.5.0 - Enhanced health monitoring and external scanner support
-- v1.0.0 - Initial release
+- v1.0.0 - Initial production release with advanced scanner features
+- See [RELEASE_NOTES_v1.1.0.md](RELEASE_NOTES_v1.1.0.md) for detailed changelog
 
 ## Troubleshooting
 

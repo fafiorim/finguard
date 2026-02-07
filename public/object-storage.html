@@ -665,7 +665,11 @@
             results.forEach(result => {
                 if (result.success) {
                     const scanResult = JSON.parse(result.data.scanResult);
+                    console.log('Scan result for', result.key, ':', scanResult);
+                    console.log('scanResult.scanResult =', scanResult.scanResult, 'type:', typeof scanResult.scanResult);
+                    // scanResult: 0 indicates clean, non-zero indicates threat  
                     const isClean = scanResult.scanResult === 0;
+                    console.log('isClean =', isClean);
                     const className = isClean ? 'clean' : 'malware';
                     
                     html += `
@@ -673,6 +677,7 @@
                             <h4>${isClean ? '✓ Clean' : '⚠ Malware Detected'}: ${result.key.split('/').pop()}</h4>
                             <p><strong>Object:</strong> s3://${result.data.bucket}/${result.data.key}</p>
                             <p><strong>Scan ID:</strong> ${scanResult.scanId}</p>
+                            <p><strong>DEBUG - scanResult code:</strong> ${scanResult.scanResult} (type: ${typeof scanResult.scanResult})</p>
                     `;
 
                     if (!isClean && scanResult.foundMalwares) {

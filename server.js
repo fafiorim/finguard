@@ -650,6 +650,8 @@ app.post('/api/s3/scan', basicAuth, async (req, res) => {
         // Parse the scan result to store in scan history
         const scanData = response.data;
         const scanResult = JSON.parse(scanData.scanResult);
+        
+        // scanResult: 0 indicates clean, non-zero indicates threat
         const isSafe = scanResult.scanResult === 0;
         
         // Store scan result in history

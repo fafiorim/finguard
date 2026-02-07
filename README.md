@@ -556,7 +556,39 @@ docker exec finguard tail -f /var/log/s3-scanner.log
 
 ## Testing
 
-### Test with Sample Files
+FinGuard includes a comprehensive test suite to validate all functionality, configurations, and malware detection capabilities.
+
+### Quick Smoke Test (5 seconds)
+
+```bash
+./test-quick.sh
+```
+
+Tests core functionality:
+- ✓ Health endpoint
+- ✓ Authentication
+- ✓ EICAR malware detection
+- ✓ Scan results API
+
+### Comprehensive Test Suite (30 seconds)
+
+```bash
+./test-all.sh
+```
+
+Tests all features:
+- ✓ Health checks and service status
+- ✓ Authentication (admin & user roles)
+- ✓ Scanner configurations (PML, Verbose, Active Content, etc.)
+- ✓ Security modes (prevent, logOnly, disabled)
+- ✓ EICAR malware detection
+- ✓ Safe file scanning (samples/safe-file.pdf)
+- ✓ Active content detection (samples/file_active_content.pdf)
+- ✓ Scan results API
+
+### Manual Testing
+
+#### Test with Sample Files
 
 ```bash
 # Upload safe PDF
@@ -576,7 +608,7 @@ curl -X POST http://localhost:3000/api/upload \
   -F 'file=@samples/file_active_content.pdf'
 ```
 
-### Test Malware Detection
+#### Test Malware Detection
 
 ```bash
 # Download EICAR test file
@@ -587,6 +619,8 @@ curl -X POST http://localhost:3000/api/upload \
   -u 'admin:admin123' \
   -F 'file=@eicar.com'
 ```
+
+See [TESTING.md](TESTING.md) for complete test documentation and CI/CD integration examples.
 
 ### Test Advanced Features
 

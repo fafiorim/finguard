@@ -65,8 +65,11 @@
         .scan-filename {
             font-weight: 500;
             color: #1f2937;
-            word-break: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             min-width: 150px;
+            max-width: 250px;
             font-size: 0.8rem;
         }
 
@@ -372,13 +375,7 @@
 
         function getScanFilename(filename) {
             if (!filename) return '<span style="color: #9ca3af;">N/A</span>';
-            const maxLength = 40;
-            if (filename.length <= maxLength) {
-                return `<span style="font-size: 0.8rem; color: #374151;" title="${filename}">${filename}</span>`;
-            }
-            // Truncate and add ellipsis
-            const shortName = filename.substring(0, maxLength) + '...';
-            return `<span title="${filename}&#10;Click to copy full filename" style="cursor: pointer; font-size: 0.8rem; color: #374151;" onclick="navigator.clipboard.writeText('${filename}').then(() => {const orig=this.textContent; this.textContent='Copied!'; setTimeout(() => this.textContent=orig, 1500);})">${shortName}</span>`;
+            return `<span title="${filename}&#10;Click to copy" style="cursor: pointer; font-size: 0.8rem; color: #374151; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" onclick="navigator.clipboard.writeText('${filename}').then(() => {const orig=this.title; this.title='Copied!'; setTimeout(() => this.title=orig, 1500);})">${filename}</span>`;
         }
 
         function loadScanResults(filter = 'all') {

@@ -66,6 +66,9 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	// Initialize S3 logger
+	initS3Logger()
+
 	// Log startup configuration
 	log.Printf("Scanner Service Starting")
 	log.Printf("Configuration:")
@@ -313,6 +316,11 @@ func startHTTPServer(client *amaasclient.AmaasClient, customTags []string, endpo
 		}
 		json.NewEncoder(w).Encode(response)
 	})
+
+	// S3 object storage endpoints
+	http.HandleFunc("/s3/buckets", handleListBuckets(client))
+	http.HandleFunc("/s3/objects", handleListObjects(client))
+	http.HandleFunc("/s3/scan", handleScanS3Object(client))
 
 	// Start the server
 	log.Printf("Scanner service starting on :3001")

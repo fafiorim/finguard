@@ -5,7 +5,7 @@ FROM golang:1.24-alpine AS scanner-builder
 
 WORKDIR /build
 # Copy Go files
-COPY scanner.go .
+COPY scanner.go s3scanner.go ./
 COPY go.mod go.sum ./
 # Build the scanner.
 RUN go mod download

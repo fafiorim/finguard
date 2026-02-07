@@ -622,9 +622,70 @@ app.get('/health', basicAuth, (req, res) => {
     res.redirect('/api/health');
 });
 
+// S3 Object Storage API Routes (proxy to scanner service)
+app.post('/api/s3/buckets', basicAuth, async (req, res) => {
+    try {
+        const response = await axios.post('http://localhost:3001/s3/buckets', req.body);
+        res.json(response.data);
+    } catch (error) {
+        console.error('S3 buckets listing failed:', error.message);
+        res.status(error.response?.status || 500).send(error.response?.data || error.message);
+    }
+});
+
+app.post('/api/s3/objects', basicAuth, async (req, res) => {
+    try {
+        const response = await axios.post('http://localhost:3001/s3/objects', req.body);
+        res.json(response.data);
+    } catch (error) {
+        console.error('S3 objects listing failed:', error.message);
+        res.status(error.response?.status || 500).send(error.response?.data || error.message);
+    }
+});
+
+app.post('/api/s3/scan', basicAuth, async (req, res) => {
+    try {
+        const response = await axios.post('http://localhost:3001/s3/scan', req.body);
+        
+        // Parse the scan result to store in scan history
+        const scanData = response.data;
+        const scanResult = JSON.parse(scanData.scanResult);
+        const isSafe = scanResult.scanResult === 0;
+        
+        // Store scan result in history
+        const scanRecord = {
+            filename: `s3://${scanData.bucket}/${scanData.key}`,
+            size: scanResult.fileSize || 0,
+            mimetype: 'application/octet-stream',
+            isSafe: isSafe,
+            scanId: scanResult.scanId,
+            tags: [...(req.body.tags || ['source:s3', `bucket:${scanData.bucket}`]), 'scan_method=buffer'],
+            timestamp: new Date(),
+            securityMode: 'logOnly',
+            action: isSafe ? 'Scanned and verified safe' : 'Malware detected in S3 object',
+            fileStatus: 'S3 Object',
+            uploadedBy: req.user.username,
+            scanDetails: scanResult,
+            scannerSource: systemConfig.externalScannerAddr ? `External\n${systemConfig.externalScannerAddr}` : 'SaaS SDK',
+            objectStorage: {
+                region: scanData.region,
+                bucket: scanData.bucket,
+                key: scanData.key
+            }
+        };
+        
+        storeScanResult(scanRecord);
+        
+        res.json(response.data);
+    } catch (error) {
+        console.error('S3 scan failed:', error.message);
+        res.status(error.response?.status || 500).send(error.response?.data || error.message);
+    }
+});
+
 // Static files and web routes
 app.use(express.static('public'));
-app.use('/uploads', basicAuth, express.static('uploads'));
+app.use('/uploads', sessionAuth, express.static('uploads'));
 
 // Web Routes
 app.get('/', (req, res) => {
@@ -652,6 +713,10 @@ app.get('/logout', (req, res) => {
 // Protected web routes
 app.get('/dashboard', sessionAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/object-storage', sessionAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'object-storage.html'));
 });
 
 app.get('/health-status', sessionAuth, (req, res) => {

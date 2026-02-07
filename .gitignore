@@ -68,6 +68,7 @@ build/
 uploads/
 
 # Certificates (if generated locally)
+certs/
 *.pem
 *.key
 *.crt

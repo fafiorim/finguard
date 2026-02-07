@@ -28,7 +28,7 @@ let systemConfig = {
     securityMode: process.env.SECURITY_MODE || 'logOnly', // 'prevent', 'logOnly', or 'disabled'
     scanMethod: process.env.SCAN_METHOD || 'buffer', // 'buffer' or 'file'
     scannerUrl: process.env.SCANNER_URL || 'http://localhost:3001', // Scanner service URL
-    cloudApiKey: process.env.FSS_API_KEY || '', // Cloud One API Key for local scanner
+    cloudApiKey: process.env.FSS_API_KEY || '', // TrendAI File Security API Key for local scanner
     externalScannerAddr: process.env.SCANNER_EXTERNAL_ADDR || '', // External gRPC scanner address (e.g., "10.10.21.201:50051")
     externalScannerTLS: process.env.SCANNER_USE_TLS === 'true', // Use TLS for external scanner
     digestEnabled: process.env.DIGEST_ENABLED !== 'false', // true or false (default: true)
@@ -59,7 +59,7 @@ app.use(cookieParser());
 
 // Session middleware
 app.use(session({
-    secret: 'bytevault-secret-key',
+    secret: process.env.SESSION_SECRET || 'bytevault-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: { 

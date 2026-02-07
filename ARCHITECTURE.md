@@ -44,7 +44,7 @@ FinGuard uses a **3-tier architecture** for file scanning:
 - Provides HTTP REST API for the web app
 - Integrates with Trend Micro SDK
 - Supports two backend modes:
-  - **Cloud Mode**: Connects to Trend Micro Cloud One API
+  - **Cloud Mode**: Connects to TrendAI File Security API
   - **External Mode**: Connects to on-premise gRPC scanner
 
 ### 3. Scanning Engine
@@ -53,7 +53,7 @@ FinGuard uses a **3-tier architecture** for file scanning:
 **Option A: Cloud API** (default)
 - Requires: `FSS_API_KEY`
 - Protocol: HTTPS
-- Endpoint: Cloud One File Security service
+- Endpoint: TrendAI File Security service
 
 **Option B: External gRPC**
 - Requires: `SCANNER_EXTERNAL_ADDR`
@@ -120,7 +120,7 @@ In this case, use: `http://scanner-container:3001`
 ### External gRPC Scanner
 **What it is:** The backend that the scanner service uses  
 **Options:**
-- **Empty (default):** Uses Trend Micro Cloud API
+- **Empty (default):** Uses TrendAI File Security API
 - **host:port:** Uses your own Vision One File Security deployment
 
 ```

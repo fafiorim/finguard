@@ -1,7 +1,7 @@
 # External Scanner Implementation - Change Log
 
 ## Overview
-This update adds support for connecting FinGuard to external Vision One File Security scanners (e.g., Kubernetes deployments) that use gRPC protocol, eliminating the need for Cloud One API keys.
+This update adds support for connecting FinGuard to external Vision One File Security scanners (e.g., Kubernetes deployments) that use gRPC protocol, eliminating the need for TrendAI API keys.
 
 ## Changes Made
 
@@ -168,10 +168,10 @@ body: JSON.stringify({
 ## New Features
 
 ### 1. Dual Scanner Mode Support
-- **Cloud Mode**: Traditional operation using Cloud One API
+- **Cloud Mode**: Traditional operation using TrendAI File Security API
   - Requires: `FSS_API_KEY` environment variable
   - Protocol: HTTP REST API
-  - Endpoint: Cloud One File Security service
+  - Endpoint: TrendAI File Security service
   
 - **External Mode**: Connect to on-premise scanner
   - Requires: `SCANNER_EXTERNAL_ADDR` environment variable
@@ -246,7 +246,7 @@ This will:
 
 ## Security Considerations
 
-1. **No API Key Required**: External scanners don't need Cloud One API keys
+1. **No API Key Required**: External scanners don't need TrendAI API keys
 2. **TLS Optional**: Can be enabled for encrypted gRPC connections
 3. **Admin Only**: Scanner configuration requires administrator privileges
 4. **Process Isolation**: Scanner runs as separate process with controlled restart

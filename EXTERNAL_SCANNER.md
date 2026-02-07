@@ -6,7 +6,7 @@ This guide explains how to configure FinGuard to use an external Vision One File
 
 FinGuard supports two scanner modes:
 
-1. **Cloud Mode** (default): Uses Trend Micro Cloud One File Security API
+1. **Cloud Mode** (default): Uses TrendAI File Security API
    - Requires: `FSS_API_KEY`
    - Protocol: HTTP REST API
    - Endpoint: `antimalware.us-1.cloudone.trendmicro.com:443`
@@ -68,7 +68,7 @@ docker run -d \
 
 ### Cloud Mode
 ```
-FinGuard → HTTP REST API → Cloud One File Security
+FinGuard → HTTP REST API → TrendAI File Security
 ```
 
 ### External Mode

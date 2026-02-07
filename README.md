@@ -3,7 +3,7 @@
 [![GitHub](https://img.shields.io/badge/github-fafiorim%2Ffinguard-blue)](https://github.com/fafiorim/finguard)
 [![Version](https://img.shields.io/badge/version-1.6.0-green)](https://github.com/fafiorim/finguard)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Powered by](https://img.shields.io/badge/powered%20by-TrendAI%20File%20Security-red)](https://www.trendmicro.com/cloudone)
+[![Powered by](https://img.shields.io/badge/powered%20by-TrendAI%20File%20Security-red)](https://www.trendmicro.com)
 
 **Disclaimer:** This application is designed for demo purposes only. It is not intended for production deployment under any circumstances. Use at your own risk.
 
@@ -83,6 +83,9 @@ finguard/
 git clone https://github.com/fafiorim/finguard.git
 cd finguard
 
+# Install Node.js dependencies (if building locally)
+npm install
+
 # Build the Docker image
 docker build -t finguard:latest .
 ```
@@ -138,7 +141,7 @@ FinGuard provides granular control over scanner behavior through the configurati
 ### Scanner Modes
 
 **Cloud Scanner Mode (Default)**
-- Uses Trend Micro Cloud One File Security API
+- Uses TrendAI File Security API
 - Requires FSS_API_KEY
 - Protocol: HTTP REST API
 - Global threat intelligence network
@@ -403,15 +406,18 @@ curl -X DELETE http://localhost:3000/api/files/filename.txt -u "user:your_passwo
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| FSS_API_KEY | File Security Services API Key | Required | Yes |
+| FSS_API_KEY | TrendAI File Security API Key | Required | Yes |
 | FSS_API_ENDPOINT | FSS API Endpoint | antimalware.us-1.cloudone.trendmicro.com:443 | No |
 | FSS_CUSTOM_TAGS | Custom tags for scans | (empty) | No |
 | FSS_REGION | TrendAI File Security region | us-1 | No |
+| SESSION_SECRET | Secret key for session encryption | bytevault-secret-key-change-in-production | No |
 | USER_USERNAME | Regular user username | user | No |
 | USER_PASSWORD | Regular user password | user123 | No |
 | ADMIN_USERNAME | Admin username | admin | No |
 | ADMIN_PASSWORD | Admin password | admin123 | No |
 | SECURITY_MODE | Default security mode (prevent/logOnly/disabled) | disabled | No |
+| SCANNER_EXTERNAL_ADDR | External gRPC scanner address | (empty) | No |
+| SCANNER_USE_TLS | Use TLS for external scanner | false | No |
 
 ## Ports
 
@@ -546,12 +552,17 @@ docker run -d \
 
 View logs:
 ```bash
+# View all container logs
 docker logs finguard
-docker logs -f finguard
+docker logs -f finguard  # Follow mode
 
 # View scanner service logs
-docker exec finguard cat /app/scanner.log
-docker exec finguard tail -f /app/scanner.log
+docker exec finguard cat /var/log/scanner.log
+docker exec finguard tail -f /var/log/scanner.log
+
+# View S3 scanner logs (if using Object Storage)
+docker exec finguard cat /var/log/s3-scanner.log
+docker exec finguard tail -f /var/log/s3-scanner.log
 ```
 
 ## Testing
@@ -626,7 +637,7 @@ MIT License - See LICENSE file for details
 
 For issues and questions:
 - GitHub Issues: https://github.com/fafiorim/finguard/issues
-- TrendAI File Security: https://www.trendmicro.com/cloudone
+- TrendAI File Security: https://www.trendmicro.com
 
 ## Acknowledgments
 

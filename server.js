@@ -59,7 +59,7 @@ app.use(cookieParser());
 
 // Session middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'bytevault-secret-key-change-in-production',
+    secret: process.env.SESSION_SECRET || 'finguard-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -68,7 +68,7 @@ app.use(session({
         httpOnly: true,
         sameSite: 'lax'
     },
-    name: 'bytevault.sid', // Custom session cookie name
+    name: 'finguard.sid', // Custom session cookie name
     proxy: true // Trust the reverse proxy
 }));
 
@@ -753,11 +753,11 @@ if (sslOptions) {
 
 // Start servers
 httpServer.listen(httpPort, '0.0.0.0', () => {
-    console.log(`ByteVault HTTP server running on port ${httpPort}`);
+    console.log(`FinGuard HTTP server running on port ${httpPort}`);
 });
 
 if (httpsServer) {
     httpsServer.listen(httpsPort, '0.0.0.0', () => {
-        console.log(`ByteVault HTTPS server running on port ${httpsPort}`);
+        console.log(`FinGuard HTTPS server running on port ${httpsPort}`);
     });
 }

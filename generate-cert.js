@@ -5,7 +5,7 @@ const path = require('path');
 const attrs = [
     { name: 'commonName', value: 'localhost' },
     { name: 'countryName', value: 'US' },
-    { name: 'organizationName', value: 'ByteVault Dev' },
+    { name: 'organizationName', value: 'FinGuard Dev' },
     { name: 'organizationalUnitName', value: 'Development' }
 ];
 

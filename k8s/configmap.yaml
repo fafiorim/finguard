@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bytevault-config
+  name: finguard-config
   labels:
-    app: bytevault
+    app: finguard
 data:
   admin-username: "admin"
   user-username: "user"

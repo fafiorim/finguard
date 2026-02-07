@@ -410,7 +410,7 @@ curl -X DELETE http://localhost:3000/api/files/filename.txt -u "user:your_passwo
 | FSS_API_ENDPOINT | FSS API Endpoint | antimalware.us-1.cloudone.trendmicro.com:443 | No |
 | FSS_CUSTOM_TAGS | Custom tags for scans | (empty) | No |
 | FSS_REGION | TrendAI File Security region | us-1 | No |
-| SESSION_SECRET | Secret key for session encryption | bytevault-secret-key-change-in-production | No |
+| SESSION_SECRET | Secret key for session encryption | finguard-secret-key-change-in-production | No |
 | USER_USERNAME | Regular user username | user | No |
 | USER_PASSWORD | Regular user password | user123 | No |
 | ADMIN_USERNAME | Admin username | admin | No |
@@ -509,19 +509,8 @@ docker run -d \
 - Multi-architecture: AMD64, ARM64
 
 **Previous Versions:**
-- v1.5.0 - ByteVault with enhanced health monitoring
-- v1.0.0 - Initial ByteVaultecure web interface (self-signed cert) |
-| 3001 | HTTP | Internal scanner service (not exposed) |
-
-## Web Interface
-
-### Dashboard
-- File upload with real-time scanning
-- File listing and management
-- Delete functionality
-**Previous Versions:**
-- v1.5.0 - ByteVault with enhanced health monitoring
-- v1.0.0 - Initial ByteVault release
+- v1.5.0 - Enhanced health monitoring and external scanner support
+- v1.0.0 - Initial release
 
 ## Troubleshooting
 

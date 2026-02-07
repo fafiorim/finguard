@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bytevault-deployment
+  name: finguard-deployment
   labels:
-    app: bytevault
+    app: finguard
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bytevault
+      app: finguard
   template:
     metadata:
       labels:
-        app: bytevault
+        app: finguard
     spec:
       containers:
-      - name: bytevault
-        image: fafiorim/bytevault:latest
+      - name: finguard
+        image: fafiorim/finguard:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -27,27 +27,27 @@ spec:
         - name: ADMIN_USERNAME
           valueFrom:
             configMapKeyRef:
-              name: bytevault-config
+              name: finguard-config
               key: admin-username
         - name: USER_USERNAME
           valueFrom:
             configMapKeyRef:
-              name: bytevault-config
+              name: finguard-config
               key: user-username
         - name: ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: bytevault-secrets
+              name: finguard-secrets
               key: admin-password
         - name: USER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: bytevault-secrets
+              name: finguard-secrets
               key: user-password
         - name: FSS_API_KEY
           valueFrom:
             secretKeyRef:
-              name: bytevault-secrets
+              name: finguard-secrets
               key: fss-api-key
         volumeMounts:
         - name: uploads-volume

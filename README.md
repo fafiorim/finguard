@@ -556,7 +556,7 @@ docker exec finguard tail -f /var/log/s3-scanner.log
 
 ## Testing
 
-FinGuard includes a comprehensive test suite to validate all functionality, configurations, and malware detection capabilities.
+FinGuard includes comprehensive test scripts to validate functionality on running instances.
 
 ### Quick Smoke Test (5 seconds)
 
@@ -564,7 +564,7 @@ FinGuard includes a comprehensive test suite to validate all functionality, conf
 ./test-quick.sh
 ```
 
-Tests core functionality:
+Tests core functionality on a running container:
 - ✓ Health endpoint
 - ✓ Authentication
 - ✓ EICAR malware detection
@@ -576,7 +576,7 @@ Tests core functionality:
 ./test-all.sh
 ```
 
-Tests all features:
+Tests all features on a running container:
 - ✓ Health checks and service status
 - ✓ Authentication (admin & user roles)
 - ✓ Scanner configurations (PML, Verbose, Active Content, etc.)
@@ -585,6 +585,8 @@ Tests all features:
 - ✓ Safe file scanning (samples/safe-file.pdf)
 - ✓ Active content detection (samples/file_active_content.pdf)
 - ✓ Scan results API
+
+**Note**: Both `test-quick.sh` and `test-all.sh` test an already-running FinGuard instance. Make sure the container is running before executing these tests.
 
 ### Manual Testing
 

@@ -666,23 +666,45 @@
                 if (result.success) {
                     const scanResult = JSON.parse(result.data.scanResult);
                     console.log('Scan result for', result.key, ':', scanResult);
-                    console.log('scanResult.scanResult =', scanResult.scanResult, 'type:', typeof scanResult.scanResult);
-                    // scanResult: 0 indicates clean, non-zero indicates threat  
-                    const isClean = scanResult.scanResult === 0;
-                    console.log('isClean =', isClean);
+                    
+                    // Determine if the file is clean
+                    let isClean = true;
+                    let malwareList = [];
+                    
+                    // Check for verbose result structure (result.atse.malwareCount)
+                    if (scanResult.result && scanResult.result.atse) {
+                        const malwareCount = scanResult.result.atse.malwareCount || 0;
+                        isClean = malwareCount === 0;
+                        if (scanResult.result.atse.malware && scanResult.result.atse.malware.length > 0) {
+                            malwareList = scanResult.result.atse.malware.map(m => m.name || 'Unknown');
+                        }
+                    }
+                    // Check for standard result structure (scanResult field)
+                    else if (scanResult.scanResult !== undefined) {
+                        isClean = scanResult.scanResult === 0;
+                        if (scanResult.foundMalwares && scanResult.foundMalwares.length > 0) {
+                            malwareList = scanResult.foundMalwares.map(m => m.malwareName);
+                        }
+                    }
+                    // Fallback: check foundMalwares directly
+                    else if (scanResult.foundMalwares && scanResult.foundMalwares.length > 0) {
+                        isClean = false;
+                        malwareList = scanResult.foundMalwares.map(m => m.malwareName);
+                    }
+                    
+                    console.log('isClean =', isClean, 'malwareList =', malwareList);
                     const className = isClean ? 'clean' : 'malware';
                     
                     html += `
                         <div class="s3-scan-result ${className}" style="margin-bottom: 1rem;">
                             <h4>${isClean ? '✓ Clean' : '⚠ Malware Detected'}: ${result.key.split('/').pop()}</h4>
                             <p><strong>Object:</strong> s3://${result.data.bucket}/${result.data.key}</p>
-                            <p><strong>Scan ID:</strong> ${scanResult.scanId}</p>
-                            <p><strong>DEBUG - scanResult code:</strong> ${scanResult.scanResult} (type: ${typeof scanResult.scanResult})</p>
+                            <p><strong>Scan ID:</strong> ${scanResult.scanId || 'N/A'}</p>
                     `;
 
-                    if (!isClean && scanResult.foundMalwares) {
+                    if (!isClean && malwareList.length > 0) {
                         html += '<p><strong>Threats:</strong> ';
-                        html += scanResult.foundMalwares.map(m => m.malwareName).join(', ');
+                        html += malwareList.join(', ');
                         html += '</p>';
                     }
 

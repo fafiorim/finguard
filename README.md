@@ -39,6 +39,212 @@ FinGuard is a specialized malware scanner designed for financial institutions, l
 - **Active content detection** for Office/PDF document security
 - **Malware detection** with proper status reporting (fixed EICAR detection bug)
 
+## Architecture
+
+FinGuard uses a **3-tier microservices architecture** with dual scanner backend support:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            USER INTERFACE                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │   Browser    │  │ Mobile/App   │  │  API Client  │  │  CLI Tools   │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘ │
+│         │                 │                  │                 │          │
+│         └─────────────────┴──────────────────┴─────────────────┘          │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │ HTTPS/HTTP
+                                  │ (ports 3443/3000)
+┌─────────────────────────────────▼───────────────────────────────────────┐
+│                      WEB APPLICATION TIER (Node.js)                      │
+│  ┌────────────────────────────────────────────────────────────────────┐  │
+│  │                        server.js (Express)                          │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │  │
+│  │  │  Static Web  │  │  REST API    │  │  Session Management      │  │  │
+│  │  │  UI (HTML/   │  │  /api/*      │  │  - Auth Middleware       │  │  │
+│  │  │  CSS/JS)     │  │  /scan       │  │  - Basic Auth            │  │  │
+│  │  │              │  │  /upload     │  │  - Role-based Access     │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │  │
+│  │                                                                      │  │
+│  │  Features:                                                           │  │
+│  │  • File upload & management       • Scan results dashboard          │  │
+│  │  • Configuration UI               • Health monitoring               │  │
+│  │  • Authentication/Authorization   • Scanner log viewer              │  │
+│  │  • Security mode control          • Audit trail management          │  │
+│  └────────────────────────────────────────────────────────────────────┘  │
+│         │                                                                 │
+│         │ HTTP (localhost:3001)                                          │
+│         │ POST /scan, GET /health                                        │
+└─────────┼─────────────────────────────────────────────────────────────┘
+          │
+┌─────────▼─────────────────────────────────────────────────────────────┐
+│                   SCANNER SERVICE TIER (Go)                             │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │                     scanner.go (HTTP Server)                        │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │ │
+│  │  │ HTTP API     │  │ SDK Client   │  │  Configuration           │ │ │
+│  │  │ Wrapper      │  │ Manager      │  │  - Scan method           │ │ │
+│  │  │              │  │              │  │  - PML/SPN settings      │ │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │ │
+│  │                                                                      │ │
+│  │  Capabilities:                                                       │ │
+│  │  • Buffer scan (in-memory)        • File hash calculation           │ │
+│  │  • File scan (disk-based)         • Verbose result metadata         │ │
+│  │  • Active content detection       • Custom tagging                  │ │
+│  │  • S3 logging integration         • Health checks                   │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│         │                              │                                 │
+│         │ TrendAI SDK                  │ TrendAI SDK                     │
+│         │ amaasclient.NewClient()      │ amaasclient.NewClientInternal() │
+│         │ (Cloud Mode)                 │ (External Mode)                 │
+└─────────┼──────────────────────────────┼─────────────────────────────────┘
+          │                              │
+          │ HTTPS REST                   │ gRPC Protocol
+          │ (Regional endpoint)          │ (Direct connection)
+          │                              │
+    ┌─────▼──────┐              ┌────────▼────────┐
+    │  CLOUD     │              │  EXTERNAL       │
+    │  SCANNER   │              │  gRPC SERVER    │
+    └────────────┘              └─────────────────┘
+          │                              │
+┌─────────▼──────────────────────────────▼───────────────────────────────┐
+│                       SCANNING ENGINE TIER                               │
+│                                                                           │
+│  ┌────────────────────────────────┐  ┌────────────────────────────────┐ │
+│  │   CLOUD MODE (Default)         │  │   EXTERNAL MODE (Optional)     │ │
+│  │                                 │  │                                 │ │
+│  │  TrendAI File Security (SaaS)  │  │  Kubernetes Vision One         │ │
+│  │                                 │  │  (On-Premise gRPC)             │ │
+│  │  • Protocol: HTTPS/REST         │  │  • Protocol: gRPC (port 50051) │ │
+│  │  • Requires: FSS_API_KEY        │  │  • Requires: SCANNER_EXTERNAL_ │ │
+│  │  • Region: us-1, eu-1, etc.     │  │    ADDR (host:port format)     │ │
+│  │  • Global threat intelligence   │  │  • Optional TLS (via SCANNER_  │ │
+│  │  • Automatic updates            │  │    USE_TLS env variable)       │ │
+│  │                                 │  │  • Local/private deployment    │ │
+│  │                                 │  │  • Network isolation           │ │
+│  │                                 │  │  • SDK: NewClientInternal()    │ │
+│  │  Detection Features:            │  │                                 │ │
+│  │  ✓ Signature-based              │  │  Detection Features:           │ │
+│  │  ✓ PML (ML-based)               │  │  ✓ Signature-based             │ │
+│  │  ✓ SPN Feedback                 │  │  ✓ PML (ML-based)              │ │
+│  │  ✓ Active Content               │  │  ✓ Active Content              │ │
+│  │  ✓ File Hash (SHA1/SHA256)      │  │  ✓ File Hash (SHA1/SHA256)     │ │
+│  └────────────────────────────────┘  └────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────────────────┘
+
+                  ┌────────────────────────────────┐
+                  │   PERSISTENT STORAGE           │
+                  │                                 │
+                  │  • /uploads (temp files)        │
+                  │  • /app/scanner.log             │
+                  │  • Session store (in-memory)    │
+                  │  • Scan results (in-memory)     │
+                  │  • S3 logs (optional)           │
+                  └────────────────────────────────┘
+```
+
+### Component Interaction Flow
+
+**1. File Upload and Scan (Cloud Mode)**
+```
+User → Browser → HTTPS (3443) → server.js → Multer (upload)
+     → HTTP POST /scan → scanner.go (3001) → TrendAI SDK
+     → TrendAI Cloud API → Scan Result → scanner.go
+     → server.js → Browser (scan result display)
+```
+
+**2. File Upload and Scan (External Mode)**
+```
+User → Browser → HTTPS (3443) → server.js → Multer (upload)
+     → HTTP POST /scan → scanner.go (3001) → TrendAI SDK
+     → gRPC (50051) → Vision One Scanner → Scan Result
+     → scanner.go → server.js → Browser (scan result display)
+```
+
+**3. Configuration Management**
+```
+Admin → Configuration UI → POST /api/config → server.js
+      → Update systemConfig → Persist to environment
+      → Next scan uses new settings
+```
+
+**4. Health Check**
+```
+User → Health Status Page → GET /api/health → server.js
+     → GET /health → scanner.go → Test scanner connection
+     → Return status → Display health dashboard
+```
+
+### gRPC Connection Details
+
+**External Scanner Mode** uses gRPC protocol for high-performance, bidirectional communication:
+
+**Connection Setup:**
+```go
+// scanner.go implementation
+client, err = amaasclient.NewClientInternal("", externalAddr, useTLS, "")
+// Parameters:
+// - "" (empty string): No API key needed for external scanner
+// - externalAddr: "host:port" (e.g., "10.10.21.201:50051")
+// - useTLS: boolean flag for TLS encryption
+// - "" (empty string): No custom CA cert path
+```
+
+**gRPC Configuration:**
+- **Port**: 50051 (standard gRPC port for Vision One File Security)
+- **Protocol**: HTTP/2-based gRPC with Protocol Buffers
+- **TLS**: Optional, controlled by `SCANNER_USE_TLS` environment variable
+- **Connection**: Direct TCP/IP socket to external scanner
+- **Health Check**: gRPC health check protocol support
+- **Error Handling**: Automatic retry with exponential backoff (SDK-managed)
+
+**Network Requirements:**
+```
+FinGuard Container → gRPC Client → TCP Socket (port 50051) → External Scanner
+                                    (HTTP/2 + Protobuf)
+```
+
+**TLS Configuration:**
+- **Without TLS** (`SCANNER_USE_TLS=false`):
+  - Plain TCP connection
+  - Suitable for isolated/private networks
+  - Example: Kubernetes cluster internal communication
+
+- **With TLS** (`SCANNER_USE_TLS=true`):
+  - Encrypted gRPC channel
+  - Server certificate validation
+  - Suitable for cross-network communication
+
+**Connection Testing:**
+The Web UI provides a **Test Connection** button that:
+1. Sends a health check request via gRPC
+2. Validates scanner availability and protocol compatibility
+3. Returns connection status before applying configuration
+4. Helps diagnose network/firewall issues
+
+**Common gRPC Errors:**
+- `"Parse Error: Expected HTTP/"` → Trying to connect to gRPC with HTTP client
+- `"connection refused"` → Scanner not running or port blocked
+- `"context deadline exceeded"` → Network timeout or scanner overloaded
+- `"transport: Error while dialing"` → Invalid address or DNS resolution failure
+
+### Data Flow
+
+- **Inbound**: Users upload files via web UI or API endpoints
+- **Processing**: Files are temporarily stored in `/uploads`, scanned, then deleted
+- **Scanning**: Files sent to scanner service via HTTP (buffer or file method)
+- **Results**: Scan results stored in-memory with full metadata and tags
+- **Audit**: All scans logged with timestamps, hashes, and configuration tags
+- **Outbound**: Results displayed in UI, available via API, logged to S3 (optional)
+
+### Security Layers
+
+1. **Authentication**: Session-based login + Basic Auth for API
+2. **Authorization**: Role-based access (admin/user)
+3. **Transport**: HTTPS/TLS encryption
+4. **Network**: Isolated scanner service (localhost:3001)
+5. **File Handling**: Temporary storage with automatic cleanup
+6. **Configuration**: Admin-only access to security settings
+
 ## Directory Structure
 ```
 finguard/

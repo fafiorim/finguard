@@ -45,53 +45,53 @@ FinGuard uses a **3-tier microservices architecture** with dual scanner backend 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                            USER INTERFACE                                 │
+│                            USER INTERFACE                               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │   Browser    │  │ Mobile/App   │  │  API Client  │  │  CLI Tools   │ │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘ │
-│         │                 │                  │                 │          │
-│         └─────────────────┴──────────────────┴─────────────────┘          │
+│         │                 │                 │                 │         │
+│         └─────────────────┴─────────────────┴─────────────────┘         │
 └─────────────────────────────────┬───────────────────────────────────────┘
                                   │ HTTPS/HTTP
                                   │ (ports 3443/3000)
-┌─────────────────────────────────▼───────────────────────────────────────┐
+┌─────────────────────────────────▼────────────────────────────────────────┐
 │                      WEB APPLICATION TIER (Node.js)                      │
 │  ┌────────────────────────────────────────────────────────────────────┐  │
-│  │                        server.js (Express)                          │  │
+│  │                        server.js (Express)                         │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │  │
 │  │  │  Static Web  │  │  REST API    │  │  Session Management      │  │  │
 │  │  │  UI (HTML/   │  │  /api/*      │  │  - Auth Middleware       │  │  │
 │  │  │  CSS/JS)     │  │  /scan       │  │  - Basic Auth            │  │  │
 │  │  │              │  │  /upload     │  │  - Role-based Access     │  │  │
 │  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │  │
-│  │                                                                      │  │
-│  │  Features:                                                           │  │
-│  │  • File upload & management       • Scan results dashboard          │  │
-│  │  • Configuration UI               • Health monitoring               │  │
-│  │  • Authentication/Authorization   • Scanner log viewer              │  │
-│  │  • Security mode control          • Audit trail management          │  │
+│  │                                                                    │  │
+│  │  Features:                                                         │  │
+│  │  • File upload & management       • Scan results dashboard         │  │
+│  │  • Configuration UI               • Health monitoring              │  │
+│  │  • Authentication/Authorization   • Scanner log viewer             │  │
+│  │  • Security mode control          • Audit trail management         │  │
 │  └────────────────────────────────────────────────────────────────────┘  │
-│         │                                                                 │
+│         │                                                                │
 │         │ HTTP (localhost:3001)                                          │
 │         │ POST /scan, GET /health                                        │
-└─────────┼─────────────────────────────────────────────────────────────┘
+└─────────┼────────────────────────────────────────────────────────────────┘
           │
-┌─────────▼─────────────────────────────────────────────────────────────┐
-│                   SCANNER SERVICE TIER (Go)                             │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                     scanner.go (HTTP Server)                        │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │ │
-│  │  │ HTTP API     │  │ SDK Client   │  │  Configuration           │ │ │
-│  │  │ Wrapper      │  │ Manager      │  │  - Scan method           │ │ │
-│  │  │              │  │              │  │  - PML/SPN settings      │ │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │ │
-│  │                                                                      │ │
-│  │  Capabilities:                                                       │ │
-│  │  • Buffer scan (in-memory)        • File hash calculation           │ │
-│  │  • File scan (disk-based)         • Verbose result metadata         │ │
-│  │  • Active content detection       • Custom tagging                  │ │
-│  │  • S3 logging integration         • Health checks                   │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
+┌─────────▼────────────────────────────────────────────────────────────────┐
+│                   SCANNER SERVICE TIER (Go)                              │
+│  ┌───────────────────────────────────────────────────────────────────┐   │
+│  │                     scanner.go (HTTP Server)                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │   │
+│  │  │ HTTP API     │  │ SDK Client   │  │  Configuration           │ │   │
+│  │  │ Wrapper      │  │ Manager      │  │  - Scan method           │ │   │
+│  │  │              │  │              │  │  - PML/SPN settings      │ │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │   │
+│  │                                                                   │   │
+│  │  Capabilities:                                                    │   │
+│  │  • Buffer scan (in-memory)        • File hash calculation         │   │
+│  │  • File scan (disk-based)         • Verbose result metadata       │   │
+│  │  • Active content detection       • Custom tagging                │   │
+│  │  • S3 logging integration         • Health checks                 │   │
+│  └───────────────────────────────────────────────────────────────────┘   │
 │         │                              │                                 │
 │         │ TrendAI SDK                  │ TrendAI SDK                     │
 │         │ amaasclient.NewClient()      │ amaasclient.NewClientInternal() │
@@ -106,39 +106,39 @@ FinGuard uses a **3-tier microservices architecture** with dual scanner backend 
     │  SCANNER   │              │  gRPC SERVER    │
     └────────────┘              └─────────────────┘
           │                              │
-┌─────────▼──────────────────────────────▼───────────────────────────────┐
+┌─────────▼──────────────────────────────▼─────────────────────────────────┐
 │                       SCANNING ENGINE TIER                               │
-│                                                                           │
-│  ┌────────────────────────────────┐  ┌────────────────────────────────┐ │
-│  │   CLOUD MODE (Default)         │  │   EXTERNAL MODE (Optional)     │ │
-│  │                                 │  │                                 │ │
-│  │  TrendAI File Security (SaaS)  │  │  Kubernetes Vision One         │ │
-│  │                                 │  │  (On-Premise gRPC)             │ │
-│  │  • Protocol: HTTPS/REST         │  │  • Protocol: gRPC (port 50051) │ │
-│  │  • Requires: FSS_API_KEY        │  │  • Requires: SCANNER_EXTERNAL_ │ │
-│  │  • Region: us-1, eu-1, etc.     │  │    ADDR (host:port format)     │ │
-│  │  • Global threat intelligence   │  │  • Optional TLS (via SCANNER_  │ │
-│  │  • Automatic updates            │  │    USE_TLS env variable)       │ │
-│  │                                 │  │  • Local/private deployment    │ │
-│  │                                 │  │  • Network isolation           │ │
-│  │                                 │  │  • SDK: NewClientInternal()    │ │
-│  │  Detection Features:            │  │                                 │ │
-│  │  ✓ Signature-based              │  │  Detection Features:           │ │
-│  │  ✓ PML (ML-based)               │  │  ✓ Signature-based             │ │
-│  │  ✓ SPN Feedback                 │  │  ✓ PML (ML-based)              │ │
-│  │  ✓ Active Content               │  │  ✓ Active Content              │ │
-│  │  ✓ File Hash (SHA1/SHA256)      │  │  ✓ File Hash (SHA1/SHA256)     │ │
-│  └────────────────────────────────┘  └────────────────────────────────┘ │
-└───────────────────────────────────────────────────────────────────────────┘
+│                                                                          │
+│  ┌────────────────────────────────┐  ┌─────────────────────────────────┐ │
+│  │   CLOUD MODE (Default)         │  │   EXTERNAL MODE (Optional)      │ │
+│  │                                │  │                                 │ │
+│  │  TrendAI File Security (SaaS)  │  │  Kubernetes Vision One          │ │
+│  │                                │  │  (On-Premise gRPC)              │ │
+│  │  • Protocol: HTTPS/REST        │  │  • Protocol: gRPC (port 50051)  │ │
+│  │  • Requires: FSS_API_KEY       │  │  • Requires: SCANNER_EXTERNAL_  │ │
+│  │  • Region: us-1, eu-1, etc.    │  │    ADDR (host:port format)      │ │
+│  │  • Global threat intelligence  │  │  • Optional TLS (via SCANNER_   │ │
+│  │  • Automatic updates           │  │    USE_TLS env variable)        │ │
+│  │                                │  │  • Local/private deployment     │ │
+│  │                                │  │  • Network isolation            │ │
+│  │                                │  │  • SDK: NewClientInternal()     │ │
+│  │  Detection Features:           │  │                                 │ │
+│  │  ✓ Signature-based             │  │  Detection Features:            │ │
+│  │  ✓ PML (ML-based)              │  │  ✓ Signature-based              │ │
+│  │  ✓ SPN Feedback                │  │  ✓ PML (ML-based)               │ │
+│  │  ✓ Active Content              │  │  ✓ Active Content               │ │
+│  │  ✓ File Hash (SHA1/SHA256)     │  │  ✓ File Hash (SHA1/SHA256)      │ │
+│  └────────────────────────────────┘  └─────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
 
                   ┌────────────────────────────────┐
                   │   PERSISTENT STORAGE           │
-                  │                                 │
-                  │  • /uploads (temp files)        │
-                  │  • /app/scanner.log             │
-                  │  • Session store (in-memory)    │
-                  │  • Scan results (in-memory)     │
-                  │  • S3 logs (optional)           │
+                  │                                │
+                  │  • /uploads (temp files)       │
+                  │  • /app/scanner.log            │
+                  │  • Session store (in-memory)   │
+                  │  • Scan results (in-memory)    │
+                  │  • S3 logs (optional)          │
                   └────────────────────────────────┘
 ```
 

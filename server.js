@@ -38,8 +38,29 @@ let systemConfig = {
     activeContentEnabled: process.env.ACTIVE_CONTENT_ENABLED === 'true', // Active content detection (default: false)
 };
 
-// Store scan results in memory
-let scanResults = [];
+// Scan results persistence
+const SCAN_RESULTS_FILE = './uploads/.scan-results.json';
+
+const loadScanResults = () => {
+    try {
+        if (fs.existsSync(SCAN_RESULTS_FILE)) {
+            return JSON.parse(fs.readFileSync(SCAN_RESULTS_FILE, 'utf8'));
+        }
+    } catch (e) {
+        console.error('Failed to load scan results:', e.message);
+    }
+    return [];
+};
+
+const saveScanResults = () => {
+    try {
+        fs.writeFileSync(SCAN_RESULTS_FILE, JSON.stringify(scanResults, null, 2));
+    } catch (e) {
+        console.error('Failed to save scan results:', e.message);
+    }
+};
+
+let scanResults = loadScanResults();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -105,6 +126,7 @@ const storeScanResult = (result) => {
     if (scanResults.length > 100) {
         scanResults = scanResults.slice(0, 100);
     }
+    saveScanResults();
 };
 
 // API Endpoints - Move to /api prefix
@@ -300,7 +322,7 @@ app.get('/api/files', basicAuth, (req, res) => {
             if (err) {
                 return res.status(500).json({ error: 'Error reading files' });
             }
-            const fileList = files.map(filename => {
+            const fileList = files.filter(f => !f.startsWith('.')).map(filename => {
                 const stats = fs.statSync(path.join('./uploads', filename));
                 return {
                     name: filename,
@@ -328,6 +350,7 @@ app.delete('/api/files/:filename', basicAuth, (req, res) => {
                 return res.status(500).json({ error: 'Error deleting file' });
             }
             scanResults = scanResults.filter(result => result.filename !== req.params.filename);
+            saveScanResults();
             res.json({ message: 'File deleted successfully' });
         });
     } catch (error) {

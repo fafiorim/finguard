@@ -236,21 +236,40 @@ func startHTTPServer(client *amaasclient.AmaasClient, customTags []string, endpo
 				log.Printf("File SHA256: %s", fileSha256)
 			}
 
-			// Check if malware was found by examining the result.atse.malwareCount field
+			// Check if malware was found by examining result.atse and result.trendx (PML)
 			if result, ok := scanData["result"].(map[string]interface{}); ok {
+				// Check traditional ATSE engine
 				if atse, ok := result["atse"].(map[string]interface{}); ok {
 					if malwareCount, ok := atse["malwareCount"].(float64); ok && malwareCount > 0 {
 						isSafe = false
-						log.Printf("Malware detected! Malware count: %.0f", malwareCount)
+						log.Printf("Malware detected (ATSE)! Malware count: %.0f", malwareCount)
 					}
 
-					// Extract malware names from the malware array
 					if malwares, ok := atse["malware"].([]interface{}); ok {
 						for _, malware := range malwares {
 							if malwareMap, ok := malware.(map[string]interface{}); ok {
 								if malwareName, ok := malwareMap["name"].(string); ok {
 									tags = append(tags, "malware_name="+malwareName)
-									log.Printf("Malware name: %s", malwareName)
+									log.Printf("Malware name (ATSE): %s", malwareName)
+								}
+							}
+						}
+					}
+				}
+
+				// Check PML/TrendX engine
+				if trendx, ok := result["trendx"].(map[string]interface{}); ok {
+					if malwareCount, ok := trendx["malwareCount"].(float64); ok && malwareCount > 0 {
+						isSafe = false
+						log.Printf("Malware detected (PML/TrendX)! Malware count: %.0f", malwareCount)
+					}
+
+					if malwares, ok := trendx["malware"].([]interface{}); ok {
+						for _, malware := range malwares {
+							if malwareMap, ok := malware.(map[string]interface{}); ok {
+								if malwareName, ok := malwareMap["name"].(string); ok {
+									tags = append(tags, "malware_name="+malwareName)
+									log.Printf("Malware name (PML): %s", malwareName)
 								}
 							}
 						}
